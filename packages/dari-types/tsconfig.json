@@ -1,0 +1,13 @@
+{
+    "compilerOptions": {
+      "target": "ES2023",
+      "module": "commonjs",
+      "declaration": true,
+      "outDir": "./dist",
+      "composite": true,
+      "skipLibCheck": true,
+      "strict": false
+    },
+    "include": ["**/*"],
+    "exclude": ["node_modules", "dist"]
+  }
