@@ -1,0 +1,40 @@
+{
+  "LoginPage": {
+    "title": "Bon Retour",
+    "subtitle": "Connectez-vous pour gérer vos projets et investissements.",
+    "emailLabel": "Adresse E-mail",
+    "emailPlaceholder": "vous@dari-app.com",
+    "passwordLabel": "Mot de Passe",
+    "forgotPassword": "Mot de passe oublié ?",
+    "submitButton": "Se Connecter",
+    "registerPrompt": "Vous n'avez pas de compte ?",
+    "registerLink": "Inscrivez-vous maintenant"
+  },
+  "RegisterPage": {
+    "title": "Créez votre compte Dari",
+    "subtitle": "Rejoignez la plateforme pour optimiser vos projets immobiliers.",
+    "step1": {
+      "label": "Compte",
+      "description": "Créez vos identifiants",
+      "emailLabel": "Adresse E-mail",
+      "passwordLabel": "Mot de Passe"
+    },
+    "step2": {
+      "label": "Profil",
+      "description": "Parlez-nous de vous",
+      "nameLabel": "Votre Nom Complet"
+    },
+    "step3": {
+      "label": "Organisation",
+      "description": "Configurez votre entreprise",
+      "orgNameLabel": "Nom de l'Organisation",
+      "orgNameHint": "Ce sera le nom de votre société de développement sur la plateforme."
+    },
+    "completedText": "Toutes les étapes sont terminées ! Cliquez sur le bouton ci-dessous pour créer votre compte.",
+    "backButton": "Retour",
+    "nextButton": "Étape suivante",
+    "createAccountButton": "Créer le Compte",
+    "loginPrompt": "Vous avez déjà un compte ?",
+    "loginLink": "Se connecter"
+  }
+}
