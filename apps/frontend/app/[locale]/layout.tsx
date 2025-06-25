@@ -9,7 +9,7 @@ import { NextIntlClientProvider } from 'next-intl';
 import { getMessages } from 'next-intl/server';
 import clsx from 'clsx';
 
-const outfit = Outfit({ subsets: ['latin'] });
+const outfit = Outfit({ subsets: ['latin'], fallback: ['-apple-system', 'BlinkMacSystemFont', 'sans-serif'] });
 
 export const metadata = {
   title: 'Dari - Real Estate Management',
@@ -37,7 +37,7 @@ export default async function RootLayout({
           content="minimum-scale=1, initial-scale=1, width=device-width, user-scalable=no"
         />
       </head>
-      <body className={clsx(outfit.className, 'bg-red-100')}>
+      <body className={clsx(outfit.className)}>
         <NextIntlClientProvider messages={messages}>
           <AppProviders>{children}</AppProviders>
         </NextIntlClientProvider>
