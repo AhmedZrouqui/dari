@@ -1,4 +1,12 @@
-import { IsEmail, IsNotEmpty, IsString, MinLength } from 'class-validator';
+import {
+  IsEmail,
+  IsNotEmpty,
+  IsString,
+  MinLength,
+  IsEnum,
+  ValidateIf,
+} from 'class-validator';
+import { AccountType } from '@dari/types';
 
 export class RegisterDto {
   @IsEmail()
@@ -13,7 +21,14 @@ export class RegisterDto {
   @IsString()
   name: string;
 
-  @IsNotEmpty()
+  @IsEnum(AccountType)
+  accountType: AccountType;
+
+  @ValidateIf((o) => o.accountType === AccountType.DEVELOPER)
+  @IsNotEmpty({
+    message: 'Organization name is required for developer accounts.',
+  })
   @IsString()
+  @MinLength(3)
   organizationName: string;
 }

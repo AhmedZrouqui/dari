@@ -1,6 +1,5 @@
 import { ProtectedLayout } from '@/components/layout/ProtectedLayout';
-import { DariAppShell } from '@/components/layout/AppShell';
-import { Notifications } from '@mantine/notifications';
+import { DeveloperAppShell } from '@/components/layout/DeveloperAppShell';
 
 export default function ProtectedAreaLayout({
   children,
@@ -9,7 +8,7 @@ export default function ProtectedAreaLayout({
 }) {
   return (
     <ProtectedLayout>
-      <DariAppShell>{children}</DariAppShell>
+      <DeveloperAppShell>{children}</DeveloperAppShell>
     </ProtectedLayout>
   );
 }

@@ -1,13 +1,13 @@
 {
-    "name": "@dari/types",
-    "version": "1.0.0",
-    "main": "index.js",
-    "types": "index.d.ts",
-    "files": ["**/*"],
-    "scripts": {
-      "build": "tsc"
-    },
-    "dependencies": {
-        "@prisma/client": "latest"
-      }
+  "name": "@dari/types",
+  "version": "1.0.0",
+  "main": "./dist/index.js",
+  "types": "./dist/index.d.ts",
+  "scripts": {
+    "build": "tsc",
+    "clean": "rm -rf dist"
+  },
+  "dependencies": {
+      "@prisma/client": "latest"
   }
+}

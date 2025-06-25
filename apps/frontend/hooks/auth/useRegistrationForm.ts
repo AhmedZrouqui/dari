@@ -1,17 +1,18 @@
 import { useState } from 'react';
+import { useForm } from 'react-hook-form';
+import { zodResolver } from '@hookform/resolvers/zod';
+import { useTranslations } from 'next-intl';
+import { useRouter } from 'next/navigation';
+import { notifications } from '@mantine/notifications';
+import { AxiosError } from 'axios';
+import api, { setAuthCookies } from '@/lib/api';
+import { useAuthStore } from '@/store/auth/auth.store';
 import {
   RegistrationFormValues,
   registrationSchema,
 } from '@/lib/schemas/registration.schema';
+import { AccountType } from '@dari/types';
 import { SanitizedUser } from '@/common/types/user.type';
-import api, { setAuthCookies } from '@/lib/api';
-import { useAuthStore } from '@/store/auth/auth.store';
-import { zodResolver } from '@hookform/resolvers/zod';
-import { notifications } from '@mantine/notifications';
-import { AxiosError } from 'axios';
-import { useTranslations } from 'next-intl';
-import { useRouter } from 'next/navigation';
-import { useForm } from 'react-hook-form';
 
 export const useRegistrationForm = () => {
   const [active, setActive] = useState(0);
@@ -19,30 +20,35 @@ export const useRegistrationForm = () => {
   const t = useTranslations('RegisterPage');
   const router = useRouter();
 
-  const {
-    register,
-    handleSubmit,
-    trigger,
-    formState: { errors, isSubmitting },
-  } = useForm<RegistrationFormValues>({
+  const form = useForm<RegistrationFormValues>({
     resolver: zodResolver(registrationSchema),
     mode: 'onChange',
+    defaultValues: {
+      accountType: AccountType.DEVELOPER, // Default selection
+    },
   });
+
+  const accountType = form.watch('accountType');
+  const totalSteps = accountType === AccountType.DEVELOPER ? 3 : 2;
 
   const nextStep = async () => {
     let isValid = false;
     switch (active) {
       case 0:
-        isValid = await trigger(['email', 'password']);
+        isValid = await form.trigger(['accountType', 'email', 'password']);
         break;
       case 1:
-        isValid = await trigger(['name']);
+        isValid = await form.trigger(['name']);
         break;
       case 2:
-        isValid = await trigger(['organizationName']);
+        isValid = await form.trigger(['organizationName']);
         break;
     }
-    if (isValid) setActive((current) => (current < 3 ? current + 1 : current));
+    if (isValid) {
+      // Prevent going past the last step for the current account type
+      const lastStepIndex = totalSteps - 1;
+      setActive((current) => (current < lastStepIndex ? current + 1 : current));
+    }
   };
 
   const prevStep = () =>
@@ -55,33 +61,20 @@ export const useRegistrationForm = () => {
         accessToken: string;
         refreshToken: string;
       }>('/auth/register', data);
-
       const { user, accessToken, refreshToken } = response.data;
-
-      // 1. Set the secure, httpOnly cookies
       await setAuthCookies(accessToken, refreshToken);
-
-      // 2. Update the client-side store
       login(user);
-
       notifications.show({
         title: 'Welcome!',
         message: 'Your account has been created successfully.',
         color: 'teal',
       });
-
-      // 3. Refresh the page to let the middleware handle redirection
       router.refresh();
     } catch (error) {
-      console.error('Registration failed', error);
       let errorMessage = 'An unexpected error occurred.';
-
       if (error instanceof AxiosError) {
-        errorMessage =
-          error.response?.data?.message ||
-          'An error occurred during registration.';
+        errorMessage = error.response?.data?.message || 'Registration failed.';
       }
-
       notifications.show({
         title: 'Registration Failed',
         message: errorMessage,
@@ -91,15 +84,14 @@ export const useRegistrationForm = () => {
   };
 
   return {
-    active,
-    setActive,
-    register,
-    handleSubmit,
-    errors,
-    isSubmitting,
+    form,
     nextStep,
     prevStep,
+    active,
+    setActive,
     t,
     createUser,
+    totalSteps,
+    accountType,
   };
 };

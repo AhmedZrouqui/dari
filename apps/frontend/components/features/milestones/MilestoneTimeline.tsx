@@ -186,8 +186,8 @@ export function MilestoneTimeline({ projectId }: MilestoneTimelineProps) {
         ) : (
           <Center h={100}>
             <Text c="dimmed">
-              No milestones have been added. Click "Add Milestone" to get
-              started.
+              No milestones have been added. Click &quot;Add Milestone&quot; to
+              get started.
             </Text>
           </Center>
         )}

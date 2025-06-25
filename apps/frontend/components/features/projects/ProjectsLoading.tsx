@@ -1,6 +1,6 @@
 'use client';
 
-import { Container, Skeleton, Grid, SimpleGrid, Group } from '@mantine/core';
+import { Container, Skeleton, SimpleGrid, Group } from '@mantine/core';
 
 export default function ProjectsLoading() {
   return (

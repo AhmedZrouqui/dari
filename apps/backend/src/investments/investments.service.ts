@@ -5,11 +5,11 @@ import {
   ConflictException,
 } from '@nestjs/common';
 import { CreateInvestmentDto } from './dto/create-investment.dto';
-import { PrismaService } from 'src/prisma/prisma.service';
-import { SanitizedUser } from 'src/common/types/user.types';
+import { PrismaService } from '../prisma/prisma.service';
+import { SanitizedUser } from '../common/types/user.types';
 import { OrgRole } from '@dari/types';
-import { EmailService } from 'src/email/email.service';
-import { HashService } from 'src/auth/hash.service';
+import { EmailService } from '../email/email.service';
+import { HashService } from '../auth/hash.service';
 import * as crypto from 'crypto';
 
 @Injectable()

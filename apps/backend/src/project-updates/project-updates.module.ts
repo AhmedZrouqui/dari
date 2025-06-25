@@ -1,8 +1,8 @@
 import { Module } from '@nestjs/common';
 import { ProjectUpdatesService } from './project-updates.service';
 import { ProjectUpdatesController } from './project-updates.controller';
-import { PrismaModule } from 'src/prisma/prisma.module';
-import { AuthModule } from 'src/auth/auth.module';
+import { PrismaModule } from '../prisma/prisma.module';
+import { AuthModule } from '../auth/auth.module';
 import { PassportModule } from '@nestjs/passport';
 
 @Module({

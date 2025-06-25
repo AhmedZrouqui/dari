@@ -1,21 +1,16 @@
 {
-    "name": "dari-monorepo",
-    "private": true,
-    "workspaces": [
-      "apps/*",
-      "packages/*"  
-    ],
-    "scripts": {
-      "dev:frontend": "npm run dev --workspace=apps/frontend",
-      "dev:backend": "npm run start:dev --workspace=apps/backend",
-      "build:types": "npm run build --workspace=packages/dari-types",
-      "build:backend": "npm run build:types && npm run build --workspace=apps/backend",
-      "build": "npm run build:types && npm run build --workspaces --if-present"
-    },
-    "devDependencies": {
-      "@tanstack/react-query-devtools": "^5.81.2"
-    },
-    "dependencies": {
-      "@mantine/dates": "^8.1.1"
-    }
+  "name": "dari-monorepo",
+  "private": true,
+  "workspaces": [
+    "apps/*",
+    "packages/*"  
+  ],
+  "scripts": {
+    "build:packages": "npm run build --workspace=packages/dari-types",
+    "build:apps": "npm run build --workspaces --if-present",
+    "build": "npm run build:packages && npm run build:apps",
+    "dev:frontend": "npm run dev --workspace=apps/frontend",
+    "dev:backend": "npm run start:dev --workspace=apps/backend",
+    "clean": "rm -rf apps/*/dist apps/*/.next packages/*/dist"
   }
+}

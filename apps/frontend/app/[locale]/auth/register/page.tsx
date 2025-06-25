@@ -1,8 +1,3 @@
-// ===================================
-// File: app/[locale]/auth/register/page.tsx (REDESIGNED)
-// Description: A sophisticated, centered, multi-step registration form.
-// ===================================
-
 'use client';
 
 import {
@@ -16,35 +11,30 @@ import {
   Text,
   Stack,
   Anchor,
+  SegmentedControl,
 } from '@mantine/core';
 import { AtSign, Lock, User as UserIcon, Building } from 'lucide-react';
 import Link from 'next/link';
 import { useRegistrationForm } from '@/hooks/auth/useRegistrationForm';
-import { RegistrationFormValues } from '@/lib/schemas/registration.schema';
+import { Controller } from 'react-hook-form';
+import { AccountType } from '@dari/types';
 
 export default function RegisterPage() {
   const {
-    register,
-    handleSubmit,
-    errors,
-    isSubmitting,
+    form,
     nextStep,
     prevStep,
     active,
     setActive,
     t,
     createUser,
+    totalSteps,
+    accountType,
   } = useRegistrationForm();
 
-  const onSubmit = async (data: RegistrationFormValues) => {
-    await createUser(data);
-  };
-
   return (
-    // Main container to center the form vertically and horizontally
     <div className="min-h-screen flex items-center justify-center bg-slate-50 p-4">
       <div className="w-full max-w-2xl">
-        {/* Header Section */}
         <div className="text-center mb-8">
           <svg
             className="mx-auto h-12 w-auto text-dari-blue-600"
@@ -83,75 +73,89 @@ export default function RegisterPage() {
             {t('subtitle')}
           </Text>
         </div>
-
-        {/* Form Section */}
         <Paper withBorder shadow="md" p="xl" radius="lg">
-          <form onSubmit={handleSubmit(onSubmit)}>
+          <form onSubmit={form.handleSubmit(createUser)}>
             <Stepper
               active={active}
               onStepClick={setActive}
               allowNextStepsSelect={false}
             >
-              {/* STEP 1: ACCOUNT */}
               <Stepper.Step
                 label={t('step1.label')}
                 description={t('step1.description')}
-                key={'step-1'}
               >
                 <Stack gap="lg" mt="xl">
+                  <Controller
+                    name="accountType"
+                    control={form.control}
+                    render={({ field }) => (
+                      <SegmentedControl
+                        {...field}
+                        fullWidth
+                        data={[
+                          {
+                            label: 'I am a Developer',
+                            value: AccountType.DEVELOPER,
+                          },
+                          {
+                            label: 'I am an Investor',
+                            value: AccountType.INVESTOR,
+                          },
+                        ]}
+                      />
+                    )}
+                  />
                   <TextInput
                     label={t('step1.emailLabel')}
                     placeholder="you@dari-app.com"
                     leftSection={<AtSign size={16} />}
-                    {...register('email')}
-                    error={errors.email?.message}
+                    {...form.register('email')}
+                    error={form.formState.errors.email?.message}
                   />
                   <PasswordInput
                     label={t('step1.passwordLabel')}
                     placeholder="••••••••"
                     leftSection={<Lock size={16} />}
-                    {...register('password')}
-                    error={errors.password?.message}
+                    {...form.register('password')}
+                    error={form.formState.errors.password?.message}
                   />
                 </Stack>
               </Stepper.Step>
 
-              {/* STEP 2: PROFILE */}
               <Stepper.Step
                 label={t('step2.label')}
                 description={t('step2.description')}
-                key={'step-2'}
               >
                 <Stack gap="lg" mt="xl">
                   <TextInput
                     label={t('step2.nameLabel')}
                     placeholder="e.g., Yassine Bennani"
                     leftSection={<UserIcon size={16} />}
-                    {...register('name')}
-                    error={errors.name?.message}
+                    {...form.register('name')}
+                    error={form.formState.errors.name?.message}
                   />
                 </Stack>
               </Stepper.Step>
 
-              {/* STEP 3: ORGANIZATION */}
-              <Stepper.Step
-                label={t('step3.label')}
-                description={t('step3.description')}
-                key={'step-3'}
-              >
-                <Stack gap="lg" mt="xl">
-                  <TextInput
-                    label={t('step3.orgNameLabel')}
-                    placeholder="e.g., Bennani Developments"
-                    leftSection={<Building size={16} />}
-                    {...register('organizationName')}
-                    error={errors.organizationName?.message}
-                  />
-                  <Text size="xs" c="dimmed">
-                    {t('step3.orgNameHint')}
-                  </Text>
-                </Stack>
-              </Stepper.Step>
+              {accountType === AccountType.DEVELOPER && (
+                <Stepper.Step
+                  label={t('step3.label')}
+                  description={t('step3.description')}
+                >
+                  <Stack gap="lg" mt="xl">
+                    <TextInput
+                      label={t('step3.orgNameLabel')}
+                      placeholder="e.g., Bennani Developments"
+                      leftSection={<Building size={16} />}
+                      {...form.register('organizationName')}
+                      error={form.formState.errors.organizationName?.message}
+                    />
+                    <Text size="xs" c="dimmed">
+                      {t('step3.orgNameHint')}
+                    </Text>
+                  </Stack>
+                </Stepper.Step>
+              )}
 
               <Stepper.Completed>
                 <Text ta="center" mt="xl">
@@ -169,13 +173,12 @@ export default function RegisterPage() {
                 <div />
               )}
 
-              {/* This logic now handles the final step submission correctly */}
-              {active === 2 ? (
-                <Button onClick={handleSubmit(onSubmit)} loading={isSubmitting}>
+              {active < totalSteps - 1 ? (
+                <Button onClick={nextStep}>{t('nextButton')}</Button>
+              ) : (
+                <Button type="submit" loading={form.formState.isSubmitting}>
                   {t('createAccountButton')}
                 </Button>
-              ) : (
-                <Button onClick={nextStep}>{t('nextButton')}</Button>
               )}
             </Group>
 

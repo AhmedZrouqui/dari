@@ -1,3 +1,8 @@
+// ===================================
+// File: /hooks/useInvestments.ts (FIXED)
+// Description: Replaced 'any' with type-safe error handling in the mutation.
+// ===================================
+
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import api from '@/lib/api';
 import { useForm } from 'react-hook-form';
@@ -8,6 +13,7 @@ import {
 } from '@/lib/schemas/investment.schema';
 import { notifications } from '@mantine/notifications';
 import { useDisclosure } from '@mantine/hooks';
+import { AxiosError } from 'axios';
 
 // We need a more detailed type for displaying the investor list
 type InvestmentWithInvestorDetails = {
@@ -58,11 +64,16 @@ export const useInvestments = (projectId: string) => {
       form.reset();
       closeModal();
     },
-    onError: (error: any) => {
+    onError: (error: unknown) => {
+      let errorMessage = 'An unexpected error occurred.';
+      // Type guard to safely access properties on the error object
+      if (error instanceof AxiosError) {
+        errorMessage = error.response?.data?.message || 'An error occurred.';
+      }
       notifications.show({
         color: 'red',
         title: 'Invitation Failed',
-        message: error.response?.data?.message || 'An error occurred.',
+        message: errorMessage,
       });
     },
   });

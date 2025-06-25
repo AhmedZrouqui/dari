@@ -5,7 +5,6 @@ import {
   Title,
   Button,
   SimpleGrid,
-  Paper,
   Text,
   Container,
   Group,
@@ -99,8 +98,8 @@ export function ProjectClientPage({
           color="yellow"
           variant="light"
         >
-          The requested project could not be found or you don't have permission
-          to view it.
+          The requested project could not be found or you don&apos;t have
+          permission to view it.
         </Alert>
       </Container>
     );

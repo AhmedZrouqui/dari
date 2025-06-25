@@ -9,9 +9,9 @@ import {
 } from '@nestjs/common';
 import { ProjectUpdatesService } from './project-updates.service';
 import { CreateProjectUpdateDto } from './dto/create-update.dto';
-import { JwtAuthGuard } from 'src/common/guards/jwt-auth.guard';
-import { CurrentUser } from 'src/common/decorators/current-user.decorator';
-import { SanitizedUser } from 'src/common/types/user.types';
+import { JwtAuthGuard } from '../common/guards/jwt-auth.guard';
+import { CurrentUser } from '../common/decorators/current-user.decorator';
+import { SanitizedUser } from '../common/types/user.types';
 
 @UseGuards(JwtAuthGuard)
 @Controller('updates')

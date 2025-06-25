@@ -1,91 +1,76 @@
-// middleware.ts
-import createIntlMiddleware from 'next-intl/middleware';
 import { NextRequest, NextResponse } from 'next/server';
+import createIntlMiddleware from 'next-intl/middleware';
 import { jwtVerify } from 'jose';
+import { config as appConfig } from './lib/config';
 
-// Create the intl middleware
-const intlMiddleware = createIntlMiddleware({
+const intlConfig = {
   locales: ['en', 'fr'],
   defaultLocale: 'en',
-  localeDetection: true,
-  localePrefix: 'always',
-});
+  localePrefix: 'always' as const,
+};
 
-// Define protected and auth routes (without locale prefix)
-const protectedRoutes = ['/dashboard', '/profile', '/settings'];
-const authRoutes = ['/auth/login', '/auth/register', '/auth/forgot-password'];
+// IMPORTANT: Define the public-facing protected routes
+const protectedRoutes = ['/dashboard', '/projects', '/settings'];
+const authRoutes = ['/auth/login', 'auth/register'];
 
-async function authMiddleware(request: NextRequest) {
-  const { pathname } = request.nextUrl;
-
-  // Extract locale and path
-  const pathnameIsMissingLocale = ['en', 'fr'].every(
-    (locale) => !pathname.startsWith(`/${locale}/`) && pathname !== `/${locale}`
-  );
-
-  // If locale is missing, let intl middleware handle it first
-  if (pathnameIsMissingLocale) {
-    return intlMiddleware(request);
-  }
-
-  // Extract the locale and path without locale
-  const locale = pathname.split('/')[1];
-  const pathWithoutLocale = pathname.replace(`/${locale}`, '') || '/';
-
-  // Check if current path is protected or auth route
-  const isProtectedRoute = protectedRoutes.some((route) =>
-    pathWithoutLocale.startsWith(route)
-  );
-  const isAuthRoute = authRoutes.some((route) =>
-    pathWithoutLocale.startsWith(route)
-  );
-
-  // Get token from cookies (more secure than localStorage for SSR)
+async function isTokenValid(request: NextRequest): Promise<boolean> {
   const token = request.cookies.get('auth-token')?.value;
-
-  let isValidToken = false;
-  if (token) {
-    try {
-      // Verify JWT token
-      await jwtVerify(token, new TextEncoder().encode(process.env.JWT_SECRET!));
-      isValidToken = true;
-    } catch (error) {
-      // Token is invalid, clear it
-      console.log('Invalid token:', error);
-    }
+  if (!token) return false;
+  try {
+    await jwtVerify(token, new TextEncoder().encode(process.env.JWT_SECRET!));
+    return true;
+    // eslint-disable-next-line @typescript-eslint/no-unused-vars
+  } catch (e) {
+    return false;
   }
-
-  // Handle redirects for protected routes
-  if (isProtectedRoute && !isValidToken) {
-    const loginUrl = new URL(`/${locale}/auth/login`, request.url);
-    const response = NextResponse.redirect(loginUrl);
-
-    // Clear invalid token cookie
-    if (token) {
-      response.cookies.delete('auth-token');
-    }
-
-    return response;
-  }
-
-  // Handle redirects for auth routes (if already authenticated)
-  if (isAuthRoute && isValidToken) {
-    const dashboardUrl = new URL(`/${locale}/dashboard`, request.url);
-    return NextResponse.redirect(dashboardUrl);
-  }
-
-  // If no auth logic applies, use intl middleware for locale handling
-  return intlMiddleware(request);
 }
 
-export default authMiddleware;
+export async function middleware(request: NextRequest) {
+  const hostname = request.headers.get('host')!;
+  const url = request.nextUrl.clone();
+  const { pathname } = request.nextUrl;
+
+  // Step 1: Determine the correct internal portal path based on the subdomain
+  let portalPath: string;
+  if (hostname === appConfig.domains.developer) {
+    portalPath = '/(portals)/(developer)';
+  } else if (hostname === appConfig.domains.investor) {
+    portalPath = '/(portals)/(investor)';
+  } else {
+    portalPath = '/(portals)/(marketing)';
+  }
+
+  // Rewrite to the correct portal route group
+  url.pathname = `${portalPath}${pathname}`;
+  let response = NextResponse.rewrite(url);
+
+  // Step 2: Handle authentication
+  const isValidToken = await isTokenValid(request);
+  const isProtectedRoute = protectedRoutes.some((route) =>
+    pathname.startsWith(route)
+  );
+  const isAuthRoute = authRoutes.some((route) => pathname.startsWith(route));
+
+  const locale =
+    intlConfig.locales.find((l) => pathname.startsWith(`/${l}`)) ||
+    intlConfig.defaultLocale;
+
+  if (isProtectedRoute && !isValidToken) {
+    response = NextResponse.redirect(
+      new URL(`/${locale}/auth/login`, request.url)
+    );
+  }
+
+  if (isAuthRoute && isValidToken) {
+    response = NextResponse.redirect(
+      new URL(`/${locale}/dashboard`, request.url)
+    );
+  }
+
+  // Step 3: Apply internationalization
+  return createIntlMiddleware(intlConfig)(response as unknown as NextRequest);
+}
 
 export const config = {
-  matcher: [
-    // Match all pathnames except for
-    // - API routes
-    // - files with extensions (e.g. favicon.ico)
-    // - Next.js internal files
-    '/((?!api|_next|_vercel|.*\\..*).*)',
-  ],
+  matcher: ['/((?!api|_next/static|_next/image|favicon.ico).*)'],
 };

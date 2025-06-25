@@ -3,8 +3,8 @@ import {
   NotFoundException,
   ForbiddenException,
 } from '@nestjs/common';
-import { PrismaService } from 'src/prisma/prisma.service';
-import { SanitizedUser } from 'src/common/types/user.types';
+import { PrismaService } from '../prisma/prisma.service';
+import { SanitizedUser } from '../common/types/user.types';
 import { OrgRole } from '@dari/types';
 import { CreateProjectUpdateDto } from './dto/create-update.dto';
 

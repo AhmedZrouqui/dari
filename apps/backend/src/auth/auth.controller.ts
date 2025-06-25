@@ -13,8 +13,8 @@ import { LoginDto } from './dto/login.dto';
 import { ILoginResponse } from './types/types';
 import { ForgotPasswordDto } from './dto/forgot-password.dto';
 import { ResetPasswordDto } from './dto/reset-password.dto';
-import { RefreshTokenGuard } from 'src/common/guards/refresh-token.guard';
-import { RequestWithUser } from 'src/common/types/request.types';
+import { RefreshTokenGuard } from '../common/guards/refresh-token.guard';
+import { RequestWithUser } from '../common/types/request.types';
 
 @Controller('auth')
 export class AuthController {

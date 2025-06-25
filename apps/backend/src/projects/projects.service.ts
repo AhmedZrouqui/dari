@@ -14,7 +14,6 @@ export class ProjectsService {
   constructor(private prisma: PrismaService) {}
 
   async create(createProjectDto: CreateProjectDto, user: SanitizedUser) {
-    console.log(user);
     const membership = await this.prisma.membership.findFirst({
       where: {
         userId: user.id,
@@ -24,7 +23,7 @@ export class ProjectsService {
 
     if (!membership) {
       throw new ForbiddenException(
-        "You don't have permission to create a project in this organization.",
+        "You don't have permission to create a project.",
       );
     }
 
@@ -39,53 +38,97 @@ export class ProjectsService {
   }
 
   async findAllForUser(user: SanitizedUser) {
+    // THE CORE LOGIC: We check if the user is part of a development team.
     const membership = await this.prisma.membership.findFirst({
       where: { userId: user.id },
     });
 
-    if (!membership) {
-      throw new ForbiddenException('You are not part of any organization.');
+    if (membership) {
+      // SCENARIO 1: USER IS A DEVELOPER / TEAM MEMBER
+      // Return all projects for their organization.
+      const projects = await this.prisma.project.findMany({
+        where: {
+          organizationId: membership.organizationId,
+        },
+        orderBy: {
+          createdAt: 'desc',
+        },
+      });
+      // Convert Decimal fields before returning
+      return projects.map((p) => ({
+        ...p,
+        totalBudget: p.totalBudget.toNumber(),
+      }));
+    } else {
+      // SCENARIO 2: USER IS AN INVESTOR
+      // They have no membership. Fetch projects where they have an investment.
+      const projects = await this.prisma.project.findMany({
+        where: {
+          investments: {
+            some: {
+              userId: user.id,
+            },
+          },
+        },
+        orderBy: {
+          createdAt: 'desc',
+        },
+      });
+      // Convert Decimal fields before returning
+      return projects.map((p) => ({
+        ...p,
+        totalBudget: p.totalBudget.toNumber(),
+      }));
     }
-
-    const projects = await this.prisma.project.findMany({
-      where: {
-        organizationId: membership.organizationId,
-      },
-      orderBy: {
-        createdAt: 'desc',
-      },
-    });
-
-    return projects.map((project) => ({
-      ...project,
-      totalBudget: project.totalBudget.toNumber(),
-    }));
   }
 
   async findOneById(id: string, user: SanitizedUser) {
-    const project = await this.verifyProjectAccess(id, user.id, [
-      OrgRole.OWNER,
-      OrgRole.ADMIN,
-      OrgRole.MEMBER,
-    ]);
+    const project = await this.prisma.project.findUnique({ where: { id } });
+    if (!project) {
+      throw new NotFoundException(`Project with ID "${id}" not found.`);
+    }
 
-    const projectDetails = await this.prisma.project.findUnique({
+    // Now, we need to verify access for either a developer or an investor.
+    const isDeveloper = await this.prisma.membership.findFirst({
+      where: { userId: user.id, organizationId: project.organizationId },
+    });
+
+    const isInvestor = await this.prisma.investment.findFirst({
+      where: { userId: user.id, projectId: project.id },
+    });
+
+    if (!isDeveloper && !isInvestor) {
+      throw new ForbiddenException(
+        "You don't have permission to access this project.",
+      );
+    }
+
+    const projectWithDetails = await this.prisma.project.findUnique({
       where: { id },
       include: {
-        milestones: true,
+        milestones: { orderBy: { order: 'asc' } },
         investments: {
           include: {
             user: {
-              select: { id: true, email: true },
+              select: {
+                id: true,
+                email: true,
+                profile: { select: { name: true } },
+              },
             },
           },
         },
       },
     });
 
+    // Convert all Decimal fields before returning
     return {
-      ...projectDetails,
-      totalBudget: projectDetails?.totalBudget.toNumber(),
+      ...projectWithDetails,
+      totalBudget: projectWithDetails?.totalBudget.toNumber(),
+      investments: projectWithDetails?.investments.map((inv) => ({
+        ...inv,
+        amount: inv.amount.toNumber(),
+      })),
     };
   }
 

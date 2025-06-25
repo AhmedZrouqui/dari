@@ -12,13 +12,12 @@ import {
   Group,
   Breadcrumbs,
   Anchor,
-  Text,
 } from '@mantine/core';
 import { DateInput } from '@mantine/dates';
 import { Controller } from 'react-hook-form';
 import Link from 'next/link';
 import { useCreateProjectForm } from '@/hooks/business/project/useCreateProjectForm';
-import { Building, Calendar, Plus, Save } from 'lucide-react';
+import { Building, Calendar, Save } from 'lucide-react';
 
 export default function NewProjectPage() {
   const { control, register, handleSubmit, errors, isSubmitting, onSubmit } =

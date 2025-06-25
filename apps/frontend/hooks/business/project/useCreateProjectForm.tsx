@@ -30,8 +30,8 @@ export const useCreateProjectForm = () => {
   const {
     register,
     handleSubmit,
-    control, // Needed for Mantine's DateInput
-    formState: { errors, isSubmitting },
+    control,
+    formState: { errors },
   } = useForm<CreateProjectFormValues>({
     resolver: zodResolver(createProjectSchema),
   });
@@ -71,7 +71,7 @@ export const useCreateProjectForm = () => {
     register,
     handleSubmit,
     errors,
-    isSubmitting: mutation.isPending, // Use mutation's pending state for loading
+    isSubmitting: mutation.isPending,
     onSubmit,
   };
 };

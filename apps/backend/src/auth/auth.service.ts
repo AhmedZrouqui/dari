@@ -6,6 +6,7 @@ import {
 import { JwtService } from '@nestjs/jwt';
 import { PrismaService } from '../prisma/prisma.service';
 import { RegisterDto } from './dto/register.dto';
+import { AccountType } from '@dari/types';
 import { LoginDto } from './dto/login.dto';
 import { HashService } from './hash.service';
 import { User, Role } from '@dari/types';
@@ -13,7 +14,7 @@ import { SanitizedUser } from '../common/types/user.types';
 import * as crypto from 'crypto';
 import { BadRequestException } from '@nestjs/common';
 import { ResetPasswordDto } from './dto/reset-password.dto';
-import { EmailService } from 'src/email/email.service';
+import { EmailService } from '../email/email.service';
 
 @Injectable()
 export class AuthService {
@@ -56,29 +57,60 @@ export class AuthService {
   async register(dto: RegisterDto) {
     const hashedPassword = await this.hashService.hash(dto.password);
 
-    // UPDATED: We use the new Profile model
-    const newUser = await this.prisma.$transaction(async (tx) => {
-      const user = await tx.user.create({
-        data: { email: dto.email, password: hashedPassword },
-      });
-      await tx.profile.create({ data: { name: dto.name, userId: user.id } });
-      const org = await tx.organization.create({
-        data: { name: dto.organizationName, ownerId: user.id },
-      });
-      await tx.membership.create({
-        data: { userId: user.id, organizationId: org.id, role: 'OWNER' },
-      });
-      return user;
+    // Check if user already exists
+    const existingUser = await this.prisma.user.findUnique({
+      where: { email: dto.email },
     });
+    if (existingUser) {
+      throw new BadRequestException(
+        'An account with this email already exists.',
+      );
+    }
 
-    const tokens = await this.getTokens(
-      newUser.id,
-      newUser.email,
-      newUser.role,
-    );
-    const sanitizedUser = this.sanitizeUser(newUser);
+    if (dto.accountType === AccountType.DEVELOPER) {
+      // Developer Registration Flow
+      // The validation pipe now handles this check, so we can remove the manual check.
 
-    return { ...tokens, user: sanitizedUser };
+      const newUser = await this.prisma.$transaction(async (tx) => {
+        const user = await tx.user.create({
+          data: { email: dto.email, password: hashedPassword },
+        });
+        await tx.profile.create({ data: { name: dto.name, userId: user.id } });
+        const org = await tx.organization.create({
+          data: { name: dto.organizationName!, ownerId: user.id },
+        });
+        await tx.membership.create({
+          data: { userId: user.id, organizationId: org.id, role: 'OWNER' },
+        });
+        return user;
+      });
+
+      const tokens = await this.getTokens(
+        newUser.id,
+        newUser.email,
+        newUser.role,
+      );
+      const sanitizedUser = this.sanitizeUser(newUser);
+      return { ...tokens, user: sanitizedUser };
+    } else {
+      // Investor Registration Flow
+      const newUser = await this.prisma.$transaction(async (tx) => {
+        const user = await tx.user.create({
+          data: { email: dto.email, password: hashedPassword },
+        });
+        await tx.profile.create({ data: { name: dto.name, userId: user.id } });
+        // No organization or membership is created for an investor.
+        return user;
+      });
+
+      const tokens = await this.getTokens(
+        newUser.id,
+        newUser.email,
+        newUser.role,
+      );
+      const sanitizedUser = this.sanitizeUser(newUser);
+      return { ...tokens, user: sanitizedUser };
+    }
   }
 
   async login(dto: LoginDto) {
