@@ -149,7 +149,7 @@ export default function DashboardPage() {
               ))}
             </SimpleGrid>
           ) : (
-            <Paper withBorder p="xl" radius="md" className="text-center">
+            <Paper withBorder p="xl" radius="md" className="text-center ">
               <Text>You haven't created any projects yet.</Text>
               <Button component={Link} href="projects/new" mt="md">
                 Create Your First Project
