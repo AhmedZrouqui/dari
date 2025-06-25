@@ -2,7 +2,6 @@
 
 import { useQuery } from '@tanstack/react-query';
 import api from '@/lib/api';
-import { Project } from '@dari/types';
 import {
   Container,
   SimpleGrid,
@@ -18,6 +17,7 @@ import {
 import { Plus, AlertCircle } from 'lucide-react';
 import Link from 'next/link';
 import ProjectCard from '@/components/ui/ProjectCard';
+import { Project } from '@dari/types';
 
 // API fetching function for the client
 const fetchProjects = async (): Promise<Project[]> => {

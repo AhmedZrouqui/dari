@@ -38,6 +38,7 @@ export class MilestonesController {
     @Query('projectId', ParseUUIDPipe) projectId: string,
     @CurrentUser() user: SanitizedUser,
   ) {
+    console.log('triggered', projectId, user);
     return this.milestonesService.findAllForProject(projectId, user);
   }
 

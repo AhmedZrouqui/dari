@@ -8,24 +8,24 @@ import {
   AddMilestoneValues,
 } from '@/lib/schemas/milestone.schema';
 import { notifications } from '@mantine/notifications';
+import { useState } from 'react';
+import { useDisclosure } from '@mantine/hooks';
 
-export const useMilestonesForm = (projectId: string) => {
+export const useMilestones = (projectId: string) => {
   const queryClient = useQueryClient();
   const queryKey = ['milestones', projectId];
 
-  const {
-    register,
-    handleSubmit,
-    reset,
-    formState: { errors },
-  } = useForm<AddMilestoneValues>({
+  const [isModalOpen, { open: openModal, close: closeModal }] =
+    useDisclosure(false);
+  const [editingId, setEditingId] = useState<string | null>(null);
+
+  const form = useForm<AddMilestoneValues>({
     resolver: zodResolver(addMilestoneSchema),
   });
 
-  // 1. Fetching Logic
-  const { data: milestones, isLoading } = useQuery({
+  const { data: milestones, isLoading } = useQuery<Milestone[]>({
     queryKey,
-    queryFn: async (): Promise<Milestone[]> => {
+    queryFn: async () => {
       const { data } = await api.get<Milestone[]>(
         `/milestones?projectId=${projectId}`
       );
@@ -33,8 +33,7 @@ export const useMilestonesForm = (projectId: string) => {
     },
   });
 
-  // 2. Update Logic (with Optimistic Update)
-  const updateMutation = useMutation({
+  const updateStatusMutation = useMutation({
     mutationFn: async ({
       id,
       status,
@@ -44,6 +43,7 @@ export const useMilestonesForm = (projectId: string) => {
     }) => {
       return api.patch(`/milestones/${id}`, { status });
     },
+    // Using optimistic updates for a snappy UI
     onMutate: async (newMilestone) => {
       await queryClient.cancelQueries({ queryKey });
       const previousMilestones =
@@ -59,50 +59,66 @@ export const useMilestonesForm = (projectId: string) => {
       notifications.show({
         color: 'red',
         title: 'Update Failed',
-        message: 'Could not update milestone status.',
+        message: 'Could not update status.',
       });
       queryClient.setQueryData(queryKey, context?.previousMilestones);
     },
-    onSettled: () => {
-      queryClient.invalidateQueries({ queryKey });
-    },
+    onSettled: () => queryClient.invalidateQueries({ queryKey }),
   });
 
-  // 3. Creation Logic
-  const createMutation = useMutation({
-    mutationFn: async (newName: string) => {
-      return api.post('/milestones', { name: newName, projectId });
+  const saveMutation = useMutation({
+    mutationFn: async (data: AddMilestoneValues) => {
+      return editingId
+        ? api.patch(`/milestones/${editingId}`, data)
+        : api.post('/milestones', { ...data, projectId });
     },
     onSuccess: () => {
       notifications.show({
         color: 'teal',
-        title: 'Milestone Added',
-        message: 'New milestone has been added to the timeline.',
+        title: 'Success',
+        message: `Milestone ${editingId ? 'updated' : 'added'} successfully.`,
       });
-      reset();
       queryClient.invalidateQueries({ queryKey });
+      closeModal();
     },
     onError: () => {
       notifications.show({
         color: 'red',
-        title: 'Creation Failed',
-        message: 'Could not add the new milestone.',
+        title: 'Error',
+        message: 'The operation failed.',
       });
     },
   });
 
-  const handleCreateMilestone = (data: AddMilestoneValues) => {
-    createMutation.mutate(data.name);
+  const handleOpenAddModal = () => {
+    setEditingId(null);
+    form.reset({ name: '', description: '', targetDate: undefined });
+    openModal();
+  };
+
+  const handleOpenEditModal = (milestone: Milestone) => {
+    setEditingId(milestone.id);
+    form.reset({
+      name: milestone.name,
+      description: milestone.description || '',
+      targetDate: milestone.targetDate
+        ? new Date(milestone.targetDate)
+        : undefined,
+    });
+    openModal();
   };
 
   return {
     milestones,
     isLoading,
-    updateStatus: updateMutation.mutate,
-    // Form related exports
-    register,
-    handleSubmit: handleSubmit(handleCreateMilestone),
-    errors,
-    isCreating: createMutation.isPending,
+    updateStatus: updateStatusMutation.mutate,
+    form,
+    isModalOpen,
+    editingId,
+    isSaving: saveMutation.isPending,
+    handleOpenAddModal,
+    handleOpenEditModal,
+    closeModal,
+    onSubmit: form.handleSubmit((data) => saveMutation.mutate(data)),
   };
 };

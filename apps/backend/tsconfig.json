@@ -10,6 +10,7 @@
     "sourceMap": true,
     "outDir": "./dist",
     "baseUrl": "./",
+    "rootDir": "./src",
     "paths": {
       "@dari/types": ["../../packages/dari-types"],
       "src/*": ["src/*"]
@@ -24,5 +25,12 @@
   },
   "include": [
     "src/**/*"
+  ],
+  "exclude": [
+    "node_modules",
+    "dist"
+  ],
+  "references": [
+    { "path": "../../packages/dari-types" }
   ]
 }

@@ -1,10 +1,10 @@
-import { Paper, Group, Text } from '@mantine/core';
+import { Paper, Group, Text, ThemeIcon } from '@mantine/core';
 
 interface StatCardProps {
   title: string;
   value: string;
   icon: React.ElementType;
-  color?: string;
+  color: string; // e.g., 'blue', 'teal'
 }
 
 export default function StatCard({
@@ -14,11 +14,16 @@ export default function StatCard({
   color,
 }: StatCardProps) {
   return (
-    <Paper withBorder p="md" radius="md">
+    <Paper
+      withBorder
+      p="lg"
+      radius="md"
+      className={`bg-gradient-to-br from-${color}-50 to-white`}
+    >
       <Group>
-        <div className={`rounded-full p-3 bg-${color}-100 text-${color}-600`}>
+        <ThemeIcon color={color} size={48} radius="md">
           <Icon size={24} />
-        </div>
+        </ThemeIcon>
         <div>
           <Text c="dimmed" size="xs" tt="uppercase" fw={700}>
             {title}

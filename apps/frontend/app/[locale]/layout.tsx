@@ -1,5 +1,6 @@
 import '@mantine/core/styles.css';
 import '@mantine/dates/styles.css';
+import '../globals.css';
 import React from 'react';
 import { ColorSchemeScript } from '@mantine/core';
 import { Outfit } from 'next/font/google';

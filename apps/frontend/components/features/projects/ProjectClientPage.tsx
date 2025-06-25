@@ -13,6 +13,7 @@ import {
   Loader,
   Center,
   Alert,
+  Stack,
 } from '@mantine/core';
 import { useQuery } from '@tanstack/react-query';
 import Link from 'next/link';
@@ -28,6 +29,8 @@ import {
 import StatCard from '@/components/ui/StatCard';
 import api from '@/lib/api';
 import { MilestoneTimeline } from '../milestones/MilestoneTimeline';
+import { UpdatesFeed } from './UpdatesFeed';
+import { InvestorManager } from './InvestorManager';
 
 interface ProjectClientPageProps {
   projectId: string;
@@ -131,42 +134,39 @@ export function ProjectClientPage({
           title="Total Budget"
           value={`${stats.totalBudget} MAD`}
           icon={Landmark}
+          color="blue"
         />
         <StatCard
           title="Investors"
           value={stats.investorCount.toString()}
           icon={Users}
+          color="teal"
         />
         <StatCard
           title="Total Milestones"
           value={stats.milestoneCount.toString()}
           icon={Briefcase}
+          color="violet"
         />
         <StatCard
           title="Status"
           value={project.status.replace('_', ' ')}
           icon={FileText}
+          color="grape"
         />
       </SimpleGrid>
 
       {/* Main Content Area */}
       <Grid>
-        <Grid.Col span={{ base: 12, md: 8 }}>
-          <Paper withBorder p="md" radius="md" h="100%">
-            <Title order={3} mb="md">
-              Milestone Timeline
-            </Title>
+        {/* THE FIX: UpdatesFeed and InvestorManager now stack on mobile */}
+        <Grid.Col span={{ base: 12, lg: 8 }}>
+          <Stack>
             <MilestoneTimeline projectId={project.id} />
-          </Paper>
+            <UpdatesFeed projectId={project.id} />
+          </Stack>
         </Grid.Col>
-        <Grid.Col span={{ base: 12, md: 4 }}>
-          <Paper withBorder p="md" radius="md">
-            <Title order={3} mb="md">
-              Recent Updates
-            </Title>
-            {/* TODO: Recent Updates feed component will go here */}
-            <Text>Recent updates will be listed here.</Text>
-          </Paper>
+        <Grid.Col span={{ base: 12, lg: 4 }}>
+          <InvestorManager projectId={project.id} />
         </Grid.Col>
       </Grid>
     </Container>

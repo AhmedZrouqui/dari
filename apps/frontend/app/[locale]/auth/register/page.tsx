@@ -1,3 +1,8 @@
+// ===================================
+// File: app/[locale]/auth/register/page.tsx (REDESIGNED)
+// Description: A sophisticated, centered, multi-step registration form.
+// ===================================
+
 'use client';
 
 import {
@@ -14,9 +19,8 @@ import {
 } from '@mantine/core';
 import { AtSign, Lock, User as UserIcon, Building } from 'lucide-react';
 import Link from 'next/link';
-import { RegistrationFormValues } from '@/lib/schemas/registration.schema';
 import { useRegistrationForm } from '@/hooks/auth/useRegistrationForm';
-import { useEffect } from 'react';
+import { RegistrationFormValues } from '@/lib/schemas/registration.schema';
 
 export default function RegisterPage() {
   const {
@@ -32,36 +36,69 @@ export default function RegisterPage() {
     createUser,
   } = useRegistrationForm();
 
-  useEffect(() => {
-    console.log('errors', errors);
-  }, [errors]);
-
   const onSubmit = async (data: RegistrationFormValues) => {
-    console.log('clicked');
-
     await createUser(data);
   };
 
   return (
-    <div className="bg-gray-100 min-h-screen flex items-center justify-center p-4">
-      <div className="max-w-xl w-full">
-        <Title order={1} className="text-center text-dari-blue-700 mb-2">
-          {t('title')}
-        </Title>
-        <Text c="dimmed" size="sm" ta="center" mb={30}>
-          {t('subtitle')}
-        </Text>
+    // Main container to center the form vertically and horizontally
+    <div className="min-h-screen flex items-center justify-center bg-slate-50 p-4">
+      <div className="w-full max-w-2xl">
+        {/* Header Section */}
+        <div className="text-center mb-8">
+          <svg
+            className="mx-auto h-12 w-auto text-dari-blue-600"
+            width="48"
+            height="48"
+            viewBox="0 0 24 24"
+            fill="none"
+            xmlns="http://www.w3.org/2000/svg"
+          >
+            <path
+              d="M4 22L12 14L20 22"
+              stroke="currentColor"
+              strokeWidth="2"
+              strokeLinecap="round"
+              strokeLinejoin="round"
+            />
+            <path
+              d="M4 14L12 6L20 14"
+              stroke="currentColor"
+              strokeWidth="2"
+              strokeLinecap="round"
+              strokeLinejoin="round"
+            />
+            <path
+              d="M4 6L12 2L20 6"
+              stroke="currentColor"
+              strokeWidth="2"
+              strokeLinecap="round"
+              strokeLinejoin="round"
+            />
+          </svg>
+          <Title order={2} className="mt-4 font-medium text-slate-800">
+            {t('title')}
+          </Title>
+          <Text c="dimmed" size="sm" mt="xs">
+            {t('subtitle')}
+          </Text>
+        </div>
 
-        <Paper withBorder shadow="md" p={30} radius="md">
+        {/* Form Section */}
+        <Paper withBorder shadow="md" p="xl" radius="lg">
           <form onSubmit={handleSubmit(onSubmit)}>
-            <Stepper active={active} onStepClick={setActive}>
+            <Stepper
+              active={active}
+              onStepClick={setActive}
+              allowNextStepsSelect={false}
+            >
               {/* STEP 1: ACCOUNT */}
               <Stepper.Step
                 label={t('step1.label')}
                 description={t('step1.description')}
                 key={'step-1'}
               >
-                <Stack gap="md" mt="xl">
+                <Stack gap="lg" mt="xl">
                   <TextInput
                     label={t('step1.emailLabel')}
                     placeholder="you@dari-app.com"
@@ -85,7 +122,7 @@ export default function RegisterPage() {
                 description={t('step2.description')}
                 key={'step-2'}
               >
-                <Stack gap="md" mt="xl">
+                <Stack gap="lg" mt="xl">
                   <TextInput
                     label={t('step2.nameLabel')}
                     placeholder="e.g., Yassine Bennani"
@@ -102,7 +139,7 @@ export default function RegisterPage() {
                 description={t('step3.description')}
                 key={'step-3'}
               >
-                <Stack gap="md" mt="xl">
+                <Stack gap="lg" mt="xl">
                   <TextInput
                     label={t('step3.orgNameLabel')}
                     placeholder="e.g., Bennani Developments"
@@ -116,7 +153,11 @@ export default function RegisterPage() {
                 </Stack>
               </Stepper.Step>
 
-              <Stepper.Completed>{t('completedText')}</Stepper.Completed>
+              <Stepper.Completed>
+                <Text ta="center" mt="xl">
+                  {t('completedText')}
+                </Text>
+              </Stepper.Completed>
             </Stepper>
 
             <Group justify="space-between" mt="xl">
@@ -128,19 +169,19 @@ export default function RegisterPage() {
                 <div />
               )}
 
-              {active < 3 ? (
-                <Button onClick={nextStep}>
-                  {active === 2 ? t('createAccountButton') : t('nextButton')}
-                </Button>
-              ) : (
-                <Button type="submit" loading={isSubmitting}>
+              {/* This logic now handles the final step submission correctly */}
+              {active === 2 ? (
+                <Button onClick={handleSubmit(onSubmit)} loading={isSubmitting}>
                   {t('createAccountButton')}
                 </Button>
+              ) : (
+                <Button onClick={nextStep}>{t('nextButton')}</Button>
               )}
             </Group>
+
             <Text c="dimmed" size="sm" ta="center" mt="xl">
               {t('loginPrompt')}{' '}
-              <Anchor component={Link} href="/auth/login" size="sm">
+              <Anchor component={Link} href="/auth/login" size="sm" fw={500}>
                 {t('loginLink')}
               </Anchor>
             </Text>

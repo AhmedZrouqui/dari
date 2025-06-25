@@ -1,8 +1,12 @@
-import { Project, Milestone, Investment } from './prisma';
-
+export * from './prisma/client';
 export type ProjectWithDetails = Project & {
-  investments: Investment[];
-  milestones: Milestone[];
+    investments: Investment[];
+    milestones: Milestone[];
 };
-
-export * from './prisma';
+export type ProjectUpdateWithAuthor = ProjectUpdate & {
+    author: {
+        profile: Profile | null;
+    };
+    attachments: Document[];
+};
+import type { Project, Investment, Milestone, ProjectUpdate, Profile, Document } from './prisma/client';

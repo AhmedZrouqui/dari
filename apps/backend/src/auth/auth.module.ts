@@ -13,6 +13,6 @@ import { RefreshTokenStrategy } from './strategies/refresh-token.strategy';
   imports: [PrismaModule, PassportModule, JwtModule.register({}), EmailModule],
   controllers: [AuthController],
   providers: [AuthService, JwtStrategy, RefreshTokenStrategy, HashService],
-  exports: [AuthService, JwtStrategy],
+  exports: [AuthService, JwtStrategy, HashService],
 })
 export class AuthModule {}

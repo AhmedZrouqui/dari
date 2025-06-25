@@ -2,7 +2,7 @@
 
 import { useQuery } from '@tanstack/react-query';
 import api from '@/lib/api';
-import { Project } from '@dari/types';
+import { Project, ProjectStatus } from '@dari/types';
 import {
   Container,
   Grid,
@@ -14,16 +14,18 @@ import {
   RingProgress,
   Button,
   Title,
+  Center,
+  Stack,
 } from '@mantine/core';
 import { Landmark, Briefcase, Users, FileText, Plus } from 'lucide-react';
 import Link from 'next/link';
 import StatCard from '@/components/ui/StatCard';
 import ProjectCard from '@/components/ui/ProjectCard';
+import { useMemo } from 'react';
 
-// API fetching function for TanStack Query
+// API fetching function
 const fetchProjects = async (): Promise<Project[]> => {
   const { data } = await api.get<Project[]>('/projects');
-
   return data;
 };
 
@@ -33,15 +35,57 @@ export default function DashboardPage() {
     queryFn: fetchProjects,
   });
 
-  // Calculate stats once data is available
-  const stats = {
-    totalValue:
-      projects?.reduce((acc, p) => acc + Number(p.totalBudget), 0) || 0,
-    activeProjects:
-      projects?.filter(
+  // Calculate stats and chart data using useMemo for performance
+  const { stats, chartData } = useMemo(() => {
+    if (!projects) {
+      return {
+        stats: { totalValue: 0, activeProjects: 0 },
+        chartData: { sections: [], legend: [], total: 0 },
+      };
+    }
+
+    const statusCounts = projects.reduce(
+      (acc, p) => {
+        acc[p.status] = (acc[p.status] || 0) + 1;
+        return acc;
+      },
+      {} as Record<ProjectStatus, number>
+    );
+
+    const totalProjects = projects.length;
+
+    const statusConfig = {
+      IN_PROGRESS: { color: 'cyan', label: 'In Progress' },
+      PLANNING: { color: 'blue', label: 'Planning' },
+      ON_HOLD: { color: 'orange', label: 'On Hold' },
+      COMPLETED: { color: 'teal', label: 'Completed' },
+      CANCELLED: { color: 'gray', label: 'Cancelled' },
+    };
+
+    const sections = Object.entries(statusCounts).map(([status, count]) => ({
+      value: (count / totalProjects) * 100,
+      color: statusConfig[status as ProjectStatus].color,
+      tooltip: `${count} projects - ${statusConfig[status as ProjectStatus].label}`,
+    }));
+
+    const legend = Object.entries(statusCounts).map(([status, count]) => ({
+      count,
+      label: statusConfig[status as ProjectStatus].label,
+      color: statusConfig[status as ProjectStatus].color,
+    }));
+
+    const calculatedStats = {
+      totalValue: projects.reduce((acc, p) => acc + Number(p.totalBudget), 0),
+      activeProjects: projects.filter(
         (p) => p.status !== 'COMPLETED' && p.status !== 'CANCELLED'
-      ).length || 0,
-  };
+      ).length,
+    };
+
+    return {
+      stats: calculatedStats,
+      chartData: { sections, legend, total: totalProjects },
+    };
+  }, [projects]);
 
   // Render loading state
   if (isLoading) {
@@ -54,25 +98,12 @@ export default function DashboardPage() {
           <Skeleton height={100} />
           <Skeleton height={100} />
         </SimpleGrid>
-        <Grid>
-          <Grid.Col span={{ base: 12, md: 8 }}>
-            <Skeleton height={40} mb="md" />
-            <SimpleGrid cols={{ base: 1, sm: 2 }}>
-              <Skeleton height={150} />
-              <Skeleton height={150} />
-            </SimpleGrid>
-          </Grid.Col>
-          <Grid.Col span={{ base: 12, md: 4 }}>
-            <Skeleton height={200} />
-          </Grid.Col>
-        </Grid>
       </Container>
     );
   }
 
   return (
     <Container fluid my="md" px="lg">
-      {/* Action Header */}
       <Group justify="space-between" mb="xl">
         <Title order={2}>Dashboard</Title>
         <Button
@@ -84,7 +115,6 @@ export default function DashboardPage() {
         </Button>
       </Group>
 
-      {/* KPI Metrics */}
       <SimpleGrid cols={{ base: 1, sm: 2, lg: 4 }} mb="xl">
         <StatCard
           title="Total Portfolio Value"
@@ -107,14 +137,13 @@ export default function DashboardPage() {
         <StatCard title="Documents" value="147" icon={FileText} color="grape" />
       </SimpleGrid>
 
-      {/* Projects Overview */}
       <Grid>
         <Grid.Col span={{ base: 12, md: 8 }}>
           <Title order={3} mb="md">
             My Projects
           </Title>
           {projects && projects.length > 0 ? (
-            <SimpleGrid cols={{ base: 1, sm: 2 }} spacing="lg">
+            <SimpleGrid cols={{ base: 1, sm: 2, xl: 2 }} spacing="lg">
               {projects.map((project) => (
                 <ProjectCard key={project.id} project={project} />
               ))}
@@ -129,27 +158,39 @@ export default function DashboardPage() {
           )}
         </Grid.Col>
         <Grid.Col span={{ base: 12, md: 4 }}>
-          <Paper withBorder p="md" radius="md">
+          <Paper withBorder p="xl" radius="md">
             <Title order={3} mb="md">
               Project Status
             </Title>
-            <Group justify="center">
+            <Group justify="center" my="lg">
               <RingProgress
-                size={180}
-                thickness={16}
+                size={200}
+                thickness={20}
                 label={
-                  <Text size="xs" ta="center">
-                    Total Projects
-                  </Text>
+                  <Center>
+                    <Text fw={700} size="xl">
+                      {chartData.total}
+                    </Text>
+                  </Center>
                 }
-                sections={[
-                  { value: 40, color: 'cyan' },
-                  { value: 15, color: 'orange' },
-                  { value: 15, color: 'grape' },
-                ]}
+                sections={chartData.sections}
               />
             </Group>
-            {/* TODO: Add Legend */}
+            <Stack gap="xs">
+              {chartData.legend.map((item) => (
+                <Group key={item.label} justify="space-between">
+                  <Group gap="sm">
+                    <div
+                      className={`w-3 h-3 rounded-full bg-${item.color}-500`}
+                    ></div>
+                    <Text size="sm">{item.label}</Text>
+                  </Group>
+                  <Text size="sm" fw={500}>
+                    {item.count}
+                  </Text>
+                </Group>
+              ))}
+            </Stack>
           </Paper>
         </Grid.Col>
       </Grid>

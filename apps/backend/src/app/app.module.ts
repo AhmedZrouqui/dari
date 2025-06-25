@@ -8,6 +8,9 @@ import { PrismaModule } from 'src/prisma/prisma.module';
 import { UsersModule } from 'src/users/users.module';
 import { ProjectModule } from 'src/projects/projects.module';
 import { PassportModule } from '@nestjs/passport';
+import { MilestonesModule } from 'src/milestones/milestones.module';
+import { ProjectUpdatesModule } from 'src/project-updates/project-updates.module';
+import { InvestmentsModule } from 'src/investments/investments.module';
 
 @Module({
   imports: [
@@ -18,6 +21,9 @@ import { PassportModule } from '@nestjs/passport';
     PrismaModule,
     EmailModule,
     ProjectModule,
+    MilestonesModule,
+    ProjectUpdatesModule,
+    InvestmentsModule,
   ],
   controllers: [AppController],
   providers: [AppService],

@@ -40,7 +40,6 @@ export class ProjectsController {
     @Param('id', ParseUUIDPipe) id: string,
     @CurrentUser() user: SanitizedUser,
   ) {
-    console.log('entered', id);
     return this.projectsService.findOneById(id, user);
   }
 
