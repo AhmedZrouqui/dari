@@ -8,9 +8,12 @@
   "scripts": {
     "dev": "turbo run dev",
     "build": "turbo run build",
+    "rebuild": "pnpm clean && pnpm install && pnpm generate:prisma && pnpm build",
     "lint": "turbo run lint",
-    "clean": "rm -rf node_modules .turbo dist",
-    "generate:prisma": "prisma generate --schema=packages/dari-types/prisma/schema.prisma"
+    "clean": "rm -rf node_modules .turbo dist packages/**/dist packages/**/client",
+    "generate:prisma": "prisma generate --schema=packages/dari-types/prisma/schema.prisma",
+    "clean:hard": "rm -rf node_modules pnpm-lock.yaml && find . -type d -name 'node_modules' -prune -exec rm -rf '{}' +",
+    "doctor": "pnpm list --depth=0 && echo 'Check complete.'"
   },
   "devDependencies": {
     "prisma": "^6.10.1",

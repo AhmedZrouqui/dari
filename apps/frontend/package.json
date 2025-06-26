@@ -28,6 +28,7 @@
   },
   "devDependencies": {
     "@eslint/eslintrc": "^3",
+    "@tanstack/react-query-devtools": "^5.81.2",
     "@hookform/resolvers": "^5.1.1",
     "@mantine/form": "^8.1.2",
     "@tailwindcss/postcss": "^4",

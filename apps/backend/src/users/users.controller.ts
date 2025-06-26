@@ -9,7 +9,7 @@ export class UsersController {
   constructor() {}
 
   @Get('me')
-  getMe(@CurrentUser() user: SanitizedUser) {
+  getMe(@CurrentUser() user: SanitizedUser): SanitizedUser {
     return user;
   }
 }
