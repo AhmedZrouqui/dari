@@ -3,14 +3,18 @@
   "private": true,
   "workspaces": [
     "apps/*",
-    "packages/*"  
+    "packages/*"
   ],
   "scripts": {
-    "build:packages": "npm run build --workspace=packages/dari-types",
-    "build:apps": "npm run build --workspaces --if-present",
-    "build": "npm run build:packages && npm run build:apps",
-    "dev:frontend": "npm run dev --workspace=apps/frontend",
-    "dev:backend": "npm run start:dev --workspace=apps/backend",
-    "clean": "rm -rf apps/*/dist apps/*/.next packages/*/dist"
-  }
+    "dev": "turbo run dev",
+    "build": "turbo run build",
+    "lint": "turbo run lint",
+    "clean": "rm -rf node_modules .turbo dist",
+    "generate:prisma": "prisma generate --schema=packages/dari-types/prisma/schema.prisma"
+  },
+  "devDependencies": {
+    "prisma": "^6.10.1",
+    "turbo": "^2.5.4"
+  },
+  "packageManager": "pnpm@10.12.3+sha512.467df2c586056165580ad6dfb54ceaad94c5a30f80893ebdec5a44c5aa73c205ae4a5bb9d5ed6bb84ea7c249ece786642bbb49d06a307df218d03da41c317417"
 }

@@ -10,19 +10,19 @@ import { AccountType } from '@dari/types';
 
 export class RegisterDto {
   @IsEmail()
-  email: string;
+  email!: string;
 
   @IsNotEmpty()
   @IsString()
   @MinLength(8, { message: 'Password must be at least 8 characters long' })
-  password: string;
+  password!: string;
 
   @IsNotEmpty()
   @IsString()
-  name: string;
+  name!: string;
 
   @IsEnum(AccountType)
-  accountType: AccountType;
+  accountType!: AccountType;
 
   @ValidateIf((o) => o.accountType === AccountType.DEVELOPER)
   @IsNotEmpty({
@@ -30,5 +30,5 @@ export class RegisterDto {
   })
   @IsString()
   @MinLength(3)
-  organizationName: string;
+  organizationName!: string;
 }

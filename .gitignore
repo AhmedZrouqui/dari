@@ -40,7 +40,6 @@ apps/backend/node_modules/
 
 packages/dari-types/dist/
 packages/dari-types/node_modules/
-packages/dari-types/prisma/
 
 coverage
 .nyc_output

@@ -1,15 +1,18 @@
 {
-    "compilerOptions": {
-      "target": "es2021",
-      "module": "commonjs",
-      "declaration": true,
-      "declarationMap": true,
-      "sourceMap": true,
-      "composite": true,
-      "esModuleInterop": true,
-      "forceConsistentCasingInFileNames": true,
-      "strict": true,
-      "skipLibCheck": true,
-      "moduleResolution": "node"
-    }
+  "compilerOptions": {
+    "baseUrl": ".",
+    "paths": {
+      "@dari/types": ["packages/dari-types/src"],
+      "@dari/prisma": ["packages/dari-types/client"]
+    },
+    "strict": true,
+    "esModuleInterop": true,
+    "skipLibCheck": true,
+    "forceConsistentCasingInFileNames": true,
+    "resolveJsonModule": true,
+    "moduleResolution": "node",
+    "target": "ES2021",
+    "lib": ["ESNext"],
+    "composite": true
   }
+}

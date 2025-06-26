@@ -7,9 +7,9 @@ import {
   ValidationPipe,
   VersioningType,
 } from '@nestjs/common';
-import * as compression from 'compression';
-import * as express from 'express';
-import * as cookieParser from 'cookie-parser';
+import compression from 'compression';
+import express from 'express';
+import cookieParser from 'cookie-parser';
 
 async function bootstrap() {
   const app = await NestFactory.create(AppModule, {});

@@ -4,12 +4,14 @@ import {
   IsOptional,
   IsDateString,
   IsUUID,
+  IsDefined,
 } from 'class-validator';
 
 export class CreateMilestoneDto {
   @IsString()
   @IsNotEmpty()
-  name: string;
+  @IsDefined()
+  name!: string;
 
   @IsOptional()
   @IsString()
@@ -21,5 +23,6 @@ export class CreateMilestoneDto {
 
   @IsUUID()
   @IsNotEmpty()
-  projectId: string;
+  @IsDefined()
+  projectId!: string;
 }

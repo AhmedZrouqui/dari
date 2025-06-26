@@ -1,0 +1,5 @@
+
+
+> @dari/types@1.0.0 build /Users/ahmedzrouqui/Desktop/workspace/dari-monorepo/packages/dari-types
+> tsc -p tsconfig.build.json
+

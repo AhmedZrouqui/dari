@@ -71,11 +71,13 @@ export class AuthService {
       // Developer Registration Flow
       // The validation pipe now handles this check, so we can remove the manual check.
 
-      const newUser = await this.prisma.$transaction(async (tx) => {
+      const newUser = await this.prisma.$transaction(async (tx: any) => {
         const user = await tx.user.create({
           data: { email: dto.email, password: hashedPassword },
         });
-        await tx.profile.create({ data: { name: dto.name, userId: user.id } });
+        await tx.profile.create({
+          data: { name: dto.name, userId: user.id },
+        });
         const org = await tx.organization.create({
           data: { name: dto.organizationName!, ownerId: user.id },
         });
@@ -94,11 +96,13 @@ export class AuthService {
       return { ...tokens, user: sanitizedUser };
     } else {
       // Investor Registration Flow
-      const newUser = await this.prisma.$transaction(async (tx) => {
+      const newUser = await this.prisma.$transaction(async (tx: any) => {
         const user = await tx.user.create({
           data: { email: dto.email, password: hashedPassword },
         });
-        await tx.profile.create({ data: { name: dto.name, userId: user.id } });
+        await tx.profile.create({
+          data: { name: dto.name, userId: user.id },
+        });
         // No organization or membership is created for an investor.
         return user;
       });

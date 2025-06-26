@@ -9,15 +9,15 @@ import {
 export class CreateProjectUpdateDto {
   @IsString()
   @IsNotEmpty()
-  title: string;
+  title!: string;
 
   @IsString()
   @IsNotEmpty()
-  content: string;
+  content!: string;
 
   @IsUUID()
   @IsNotEmpty()
-  projectId: string;
+  projectId!: string;
 
   @IsArray()
   @IsUUID('4', { each: true })

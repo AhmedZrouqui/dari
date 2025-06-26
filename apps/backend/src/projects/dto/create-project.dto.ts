@@ -5,12 +5,14 @@ import {
   IsNumber,
   Min,
   IsDateString,
+  IsDefined,
 } from 'class-validator';
 
 export class CreateProjectDto {
   @IsString()
   @IsNotEmpty()
-  name: string;
+  @IsDefined()
+  name!: string;
 
   @IsOptional()
   @IsString()
@@ -18,7 +20,8 @@ export class CreateProjectDto {
 
   @IsNumber()
   @Min(0)
-  totalBudget: number;
+  @IsDefined()
+  totalBudget!: number;
 
   @IsOptional()
   @IsDateString()

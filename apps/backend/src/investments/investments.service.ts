@@ -7,7 +7,7 @@ import {
 import { CreateInvestmentDto } from './dto/create-investment.dto';
 import { PrismaService } from '../prisma/prisma.service';
 import { SanitizedUser } from '../common/types/user.types';
-import { OrgRole } from '@dari/types';
+import { Investment, OrgRole } from '@dari/types';
 import { EmailService } from '../email/email.service';
 import { HashService } from '../auth/hash.service';
 import * as crypto from 'crypto';
@@ -86,7 +86,7 @@ export class InvestmentsService {
         },
       },
     });
-    return investments.map((investment) => ({
+    return investments.map((investment: Investment) => ({
       ...investment,
       amount: investment.amount.toNumber(),
     }));

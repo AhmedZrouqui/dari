@@ -6,7 +6,7 @@ import {
 import { PrismaService } from '../prisma/prisma.service';
 import { CreateProjectDto } from './dto/create-project.dto';
 import { SanitizedUser } from '../common/types/user.types';
-import { OrgRole, Project } from '@dari/types';
+import { Investment, OrgRole, Project } from '@dari/types';
 import { UpdateProjectDto } from './dto/update-project.dto';
 
 @Injectable()
@@ -55,7 +55,7 @@ export class ProjectsService {
         },
       });
       // Convert Decimal fields before returning
-      return projects.map((p) => ({
+      return projects.map((p: Project) => ({
         ...p,
         totalBudget: p.totalBudget.toNumber(),
       }));
@@ -75,7 +75,7 @@ export class ProjectsService {
         },
       });
       // Convert Decimal fields before returning
-      return projects.map((p) => ({
+      return projects.map((p: Project) => ({
         ...p,
         totalBudget: p.totalBudget.toNumber(),
       }));
@@ -125,7 +125,7 @@ export class ProjectsService {
     return {
       ...projectWithDetails,
       totalBudget: projectWithDetails?.totalBudget.toNumber(),
-      investments: projectWithDetails?.investments.map((inv) => ({
+      investments: projectWithDetails?.investments.map((inv: Investment) => ({
         ...inv,
         amount: inv.amount.toNumber(),
       })),
